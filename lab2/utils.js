@@ -10,9 +10,9 @@ export function generateSecret(){
 
 }
 
-export function hashPassword(password){
+export async function hashPassword(password){
     const salt = crypto.randomBytes(16).toString('hex')
-    const derivedKey = crypto.scrypt(password, salt, 64)
+    const derivedKey = await scrypt(password, salt, 64)
 
     //storing hashed password and salt together seperated by colon
     //becausse when verifying password later we will need to use same salt
@@ -23,5 +23,7 @@ export async function verifyPassword(password, storedHash){
     const [salt, key] = storedHash.split(':')
     const keyBuffer = Buffer.from(key, 'hex')
 
-    
+    const derivedKey = await scrypt(password, salt, 64)
+
+    return crypto.timingSafeEqual(keyBuffer, derivedKey)
 }
